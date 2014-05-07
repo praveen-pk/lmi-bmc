@@ -3,9 +3,9 @@ set(LIBRARY_NAME cmpiLMIBmc)
 set(MOF LMI_BMC.mof)
 set (CIM_CLASSES LMI_BMC)
 
-#set(LmiBmc_SRCS
-#    LmiBmc.c
-#)
+set(LmiBmc_SRCS
+    LmiBmc.c
+)
 
 konkretcmpi_generate(${MOF}
                      CIM_PROVIDERS
@@ -14,7 +14,7 @@ konkretcmpi_generate(${MOF}
 )
 
 add_library(${LIBRARY_NAME} SHARED
-            ${tutorial_SRCS}
+            ${LmiBmc_SRCS}
             ${CIM_PROVIDERS}
             ${CIM_HEADERS}
 )
