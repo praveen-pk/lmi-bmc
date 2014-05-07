@@ -1,0 +1,80 @@
+class LMI_BMC : CIM_ManagementController
+{                                                    
+
+    [Description("This variable, should always capture the latest ipv4 IP/s addresses of BMC.")]
+    string IP4Addresses[];
+
+    [Description("This variable, should always capture the latest ipv6 IP/s addresses of BMC.")]
+    string IP6Addresses[];
+
+    [Description("The VLAN setting on the BMC NIC port.")]
+    string VLAN;        
+                
+    [Description ("This variable will capture MAC address of the BMC.") ]
+    string PermanentMACAddress;
+
+
+   [Description("If BMC provides any user friendly interfaces like http, ftp etc, this variable will capture the related URL/s to interact with BMC.")]   
+    string BMC_URLs[];
+
+    [Description("This variable will capture the version of the firmware installed on the BMC")]
+    string FirmwareVersion;
+   
+   [Description("This Array will capture the list of protocols supported by the BMC"),
+    ArrayType ("Indexed"),
+    MaxLen (256),
+    ModelCorrespondence {"LMI_BMC.SupportedProtoVersion"}  ]
+    string SupportedProtos[];
+    
+    [Description("This Array will capture the version of the supported protocol listed in the corresponding index of SupportedProtos "),
+    ArrayType ("Indexed"),
+    ModelCorrespondence {"LMI_BMC.SupportedProtos" } ]
+    string SupportedProtoVersion[];
+   
+
+/*COMMENT:  Should the below function assign a new virtual ip address to those already on the BMC? Or should the user be able to pass a list of IP addresses to overwrite the existing ones? Am leaning towards the latter option*/
+
+
+
+    [Description("Function to add a new IPv4 address to BMC."),
+    ValueMap {"0","1","2"},
+    Values {"Success", "Failed", "Invalid Argument"}]
+    uint32   set_IP4Address(
+                [IN, Description ("Set the IP address of the BMC, to the input value")] 
+                string IP4Address, 
+                [IN, Description ("Set the netmask to this input value")]
+                string Netmask, 
+                [IN, Description ("Set the gateway this input value")]
+                string Gateway );
+
+
+    [Description("Function to assign a new IPv6 address to BMC."),
+     ValueMap {"0","1","2"},
+     Values {"Success", "Failed", "Invalid Argument"}]
+    uint32  set_IP6Address(
+                [IN, Description ("Set the IP address of the BMC, to the input value")] 
+                string IP6Address, 
+                [IN, Description ("Set the netmask to this input value")]
+                string Netmask, 
+                [IN, Description ("Set the gateway on BMC to this input value")]
+                string Gateway);
+
+
+
+    [Description("Function to assign a VLAN ID to BMC."),
+     ValueMap {"0","1","2"},
+     Values {"Success", "Failed", "Invalid Argument"}]
+    uint32 set_VLAN(
+                [IN, Description("Set the VLAN ID of BMC NIC to this input value")]
+                string Vlan
+                );             
+
+    
+    [Description("Some servers have dedicated NIC attached to BMC, some share a LOM used for host n/w communications. This function will let the user know which the case is."),
+    ValueMap {"0", "1","2","3","4"}, 
+    Values {"Dedicated", "LOM1","LOM2","LOM3","LOM4"}]
+    string get_active_nic();
+    
+
+};
+
