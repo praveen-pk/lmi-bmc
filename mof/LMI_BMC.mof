@@ -1,3 +1,4 @@
+[Description("Model an Out of Band Management Controller and capture its features and capabilities")]
 class LMI_BMC : CIM_ManagementController
 {                                                    
 
@@ -32,30 +33,26 @@ class LMI_BMC : CIM_ManagementController
     string SupportedProtoVersion[];
    
 
-/*COMMENT:  Should the below function assign a new virtual ip address to those already on the BMC? Or should the user be able to pass a list of IP addresses to overwrite the existing ones? Am leaning towards the latter option*/
-
-
-
-    [Description("Function to add a new IPv4 address to BMC."),
+    [Description("Function to add a new IPv4 address/es to BMC. The passed ipaddresses and netmasks will be assigned to the BMC. A Netmask for every IP address should be present in the input."),
     ValueMap {"0","1","2"},
     Values {"Success", "Failed", "Invalid Argument"}]
     uint32   set_IP4Address(
-                [IN, Description ("Set the IP address of the BMC, to the input value")] 
-                string IP4Address, 
-                [IN, Description ("Set the netmask to this input value")]
-                string Netmask, 
+                [IN, Description ("Set the IP addresses of the BMC, to the input values")] 
+                string IP4Addresses[], 
+                [IN, Description ("Set the netmasks to this input values")]
+                string Netmasks[], 
                 [IN, Description ("Set the gateway this input value")]
                 string Gateway );
 
 
-    [Description("Function to assign a new IPv6 address to BMC."),
+    [Description("Function to assign a new IPv6 address to BMC. The passed ipaddresses and netmasks will be assigned to the BMC. A Netmask for every IP address should be present in the input."),
      ValueMap {"0","1","2"},
      Values {"Success", "Failed", "Invalid Argument"}]
     uint32  set_IP6Address(
-                [IN, Description ("Set the IP address of the BMC, to the input value")] 
-                string IP6Address, 
-                [IN, Description ("Set the netmask to this input value")]
-                string Netmask, 
+                [IN, Description ("Set the IPv6 addresses of the BMC, to the input values")] 
+                string IP6Addresses[], 
+                [IN, Description ("Set the netmasks to this input values")]
+                string Netmasks[], 
                 [IN, Description ("Set the gateway on BMC to this input value")]
                 string Gateway);
 
@@ -74,7 +71,5 @@ class LMI_BMC : CIM_ManagementController
     ValueMap {"0", "1","2","3","4"}, 
     Values {"Dedicated", "LOM1","LOM2","LOM3","LOM4"}]
     string get_active_nic();
-    
-
 };
 
