@@ -5,7 +5,6 @@
  */
 #include "LmiBmc.h"
 
-
 /*From openlmi-providers/src/hardware/utils.c
  * */
 char *trim(const char *str, const char *delims)
@@ -164,53 +163,6 @@ void free_2d_buffer(char ***buffer, unsigned *buffer_size)
     *buffer = NULL;
 }
 
-/*
-char * get_manufacturer ()
-{
-    int buf_len = BUFLEN, start_index, line_len, read;
-    int status;
-    char *start,*line, *vendor;
-    FILE *fp;
-    
-    vendor = calloc(buf_len, sizeof(char) );
-    lmi_debug ("Running 'dmidecode -t 1| grep Manufacturer ' command\n");
-    fp = popen("sudo dmidecode -t bios | grep Vendor", "r");
-    if (!fp){
-	lmi_error ("Failed to run dmidecode command. Exiting.");
-    }
-    read = getline(&line, &line_len, fp);
-    if (read == -1){
-	lmi_error ("Failed while reading the output from dmidecode");
-    }
-    status = pclose (fp);
-    if (status == -1){
-	lmi_error ("Dmidecode command Failed.\n");
-	printf ("%s",strerror(errno));
-    }
-
-    
-    start = strchr(line, ':');
-    start++;
-
-
-    if (start == NULL){
-	lmi_error ("Didn't find the expected delimiter in dmidecode output");
-    }
-    
-    start_index = start - line; 
-
-	
-    while ( (line_len - start_index) > buf_len )
-    {
-	vendor = realloc(vendor, buf_len*2);
-	buf_len *= 2;
-    }
-    vendor = trim (line + start_index, NULL );
-    printf ("\n%s\n", vendor);
-    return vendor;
-
-}
-*/
 
 /*From openlmi-providers/src/hardware/utils.c
  * */
@@ -307,11 +259,207 @@ bool is_vendor_like_dell(char *vendor)
     return false;
      
 }
+bool command_exists (char *cmd)
+{
+    int ret;
+    char  **buffer;
+    int buffer_size=0;
+    char *tmp_cmd_str = calloc (35+strlen(cmd),sizeof(char));
+    if (tmp_cmd_str == NULL ){
+    //TODO: /*Handle calloc failure*/	
+    }
 
+    strcat (tmp_cmd_str, " which ");
+    strcat (tmp_cmd_str,cmd);
+    strcat(tmp_cmd_str," > /dev/null 2>&1");
+    ret = system(tmp_cmd_str);
+    if (ret == 0)
+    {
+	return true;
+    }
+    else{
+    return false;
+    }
+
+}
+
+char * get_value_from_buffer(char *input, char **buffer, int buffer_size)
+{
+    int input_len= strlen (input);
+    int i;
+    char *tmp_str,*tmp_trim_str;
+    
+    for (i=0; i<buffer_size; i++){
+	if (strncmp(input,buffer[i],input_len) == 0){
+
+	    tmp_trim_str = trim(buffer[i]+input_len,NULL);
+	    if (tmp_trim_str[0] != ':')
+		continue;
+
+	    tmp_str = strchr(buffer[i],':');
+	    return trim(tmp_str+1,NULL);
+	}
+    }
+
+    return NULL;
+}
+
+
+
+int populate_dell_bmc_info(BMC_info *bmc_info)
+{
+    int buffer_size=0, tmp_len=0;
+    char **buffer;
+    char *tmp_str;
+    int ret=0;
+
+    if ( ! command_exists ("ipmitool ")){
+	lmi_error ("ipmitool comman doesn't exist. send empty instance");
+    }
+
+    if (run_command("ipmitool lan print 1", &buffer, &buffer_size) != 0) {
+//    if (run_command("cat ipmi_output", &buffer, &buffer_size) != 0) {
+        printf ( "Failed running the ipmitool command. Check if ipmi service is running \n");
+	goto failed;
+    }
+
+    
+    /*
+ *  Populate only one IPV4 Address
+ *  */
+    tmp_str = get_value_from_buffer("IP Address", buffer,buffer_size);
+    bmc_info->IP4Addresses = (char **) pop_calloc(1, sizeof(char*),&&failed);
+    bmc_info->IP4Addresses[0] =tmp_str;
+
+/*Populate Netmask*/
+    tmp_str = get_value_from_buffer("Subnet Mask", buffer,buffer_size);
+    bmc_info->IP4Netmasks = (char**)calloc(1, sizeof(char*));
+    if (bmc_info->IP4Netmasks == NULL)
+	goto failed;
+    bmc_info->IP4Netmasks[0] =tmp_str;
+/*Populate IP Source*/   
+    tmp_str = get_value_from_buffer("IP Address Source", buffer,buffer_size);
+    bmc_info->IP4AddressSource = (char*)calloc(1, sizeof(char*));
+    if (bmc_info->IP4AddressSource == NULL)
+	goto failed;
+    bmc_info->IP4AddressSource =tmp_str;
+
+    /*IPv6 address not supported yet*/
+    bmc_info->IP6Addresses = NULL;
+    bmc_info->IP6AddressSource = NULL;
+    bmc_info->IP6Netmasks = NULL;
+
+/*MAC Address */
+    tmp_str = get_value_from_buffer("MAC Address", buffer,buffer_size);
+    bmc_info->PermanentMACAddress = (char *)calloc(1, sizeof(char*));
+    if (bmc_info->PermanentMACAddress == NULL)
+	goto failed; 
+    bmc_info->PermanentMACAddress = tmp_str;
+    
+/* Only have one URL */
+    bmc_info->BMC_URLs = (char **)calloc( 1 ,sizeof(char*));
+    tmp_str = (char *) calloc(10+strlen(bmc_info->IP4Addresses[0]), sizeof(char));
+    strcpy(tmp_str,"https://");
+    strcat (tmp_str,bmc_info->IP4Addresses[0]);
+    bmc_info->BMC_URLs[0] = tmp_str ;
+    
+    if ( strcmp( get_value_from_buffer("802.1q VLAN ID", buffer,buffer_size), "Disabled"  ) == 0 )
+    {
+	bmc_info->vlan = 0;
+    }
+
+
+    if (run_command("ipmitool mc info", &buffer, &buffer_size) != 0) {
+//    if (run_command("cat ipmi_mc_output", &buffer, &buffer_size) != 0) {
+        printf ( "Failed running the ipmitool command. Check if ipmi service is running \n");
+        return 1;
+    }
+
+/*IPMI Version*/
+    tmp_str = get_value_from_buffer("IPMI Version", buffer,buffer_size);
+    bmc_info->supportedProtoVersions = (char**)calloc(1, sizeof(char*));
+    bmc_info->supportedProtoVersions[0] =tmp_str;
+   
+    tmp_str = calloc(4, sizeof(char));
+    strcpy(tmp_str,"IPMI");
+    bmc_info->supportedProtos = (char**)calloc(1, sizeof(char*));
+    bmc_info->supportedProtos[0] =tmp_str;
+
+    return 0;
+
+failed:
+    printf ("One of the allocations failed. Returning NULL");
+    free_bmc_info(bmc_info);
+    return 1;
+
+}
+
+void free_bmc_info( BMC_info *bmc_info)
+{
+
+int i = 0;
+
+if (bmc_info->IP4Addresses != NULL)
+{
+    int i=0;
+    while (bmc_info->IP4Addresses[i] != NULL)
+    {
+	free(bmc_info->IP4Addresses[i]);
+	i++;
+    }
+    free(bmc_info->IP4Addresses);
+}
+
+
+if (bmc_info->IP4Netmasks !=NULL )
+{
+    i=0;
+
+    while (bmc_info->IP4Netmasks[i] != NULL)
+    {
+	free(bmc_info->IP4Netmasks[i]);
+	i++;
+    }
+    free(bmc_info->IP4Netmasks);
+}
+
+
+free(bmc_info->IP4AddressSource);
+
+free(bmc_info->PermanentMACAddress);
+//TODO: Handle the remaining elements too. 
+
+free (bmc_info);
+}
+
+int init_bmc_info( BMC_info *bmc_info)
+{
+
+    bmc_info = calloc(1, sizeof(BMC_info));
+    if (bmc_info == NULL)
+    {
+	lmi_error("return empty\n");
+	return 1;
+    }
+    
+    bmc_info->IP4Addresses=NULL;
+    bmc_info->IP4Netmasks=NULL;
+    bmc_info->IP4Netmasks=NULL;
+    bmc_info->IP4AddressSource=NULL;
+    bmc_info->PermanentMACAddress=NULL;
+}
 
 main ()
 {
     char *vendor=NULL;
+    BMC_info *bmc_info;
+    init_bmc_info (bmc_info);
+
+    populate_dell_bmc_info (bmc_info);
+    printf ("IP: %s\n",bmc_info->IP4Addresses[0]);
+    printf ("IP: %s\n",bmc_info->IP4AddressSource);
+    printf ("MAC: %s\n",bmc_info->PermanentMACAddress);
+
   
 }
 

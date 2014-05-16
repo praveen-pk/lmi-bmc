@@ -3,17 +3,16 @@
  *  Licensed under the GNU General Public license, version 2.1 or any later version.
  *  Authors: Praveen K Paladugu <praveen_paladugu@dell.com>
  */
-#include <stdbool.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
 #include <malloc.h>
-#include <system.h>
+#include <stdlib.h>
 
 
 #define DELL_LIKE_VENDORS "Dell Inc, Dell"
-#define str(s) #s
 #define BUFLEN 1024
 #define WHITESPACES " \f\n\r\t\v"
 #define IPv4_Add_Size 11
@@ -23,6 +22,29 @@
 #define  lmi_error(...)  printf("\nERROR:");  printf(__VA_ARGS__)
 
 
+
+inline void * pop_calloc (size_t nmemb,size_t size,void *failed){
+	void *tmp_ptr = calloc(nmemb, size);
+	if (tmp_ptr == NULL)
+	    goto *failed;
+	return tmp_ptr;
+    }
+
+typedef struct _Bmc_info{
+    char **IP4Addresses;
+    char **IP4Netmasks;
+    char *IP4AddressSource;
+    char **IP6Addresses;
+    char **IP6Netmasks;
+    char *IP6AddressSource;
+    int vlan;
+    char *PermanentMACAddress;
+    char **BMC_URLs;
+    char *FirmwareVersion;
+    char **supportedProtos;
+    char **supportedProtoVersions;
+    char **active_nic;
+} BMC_info;
 /*
  * Run given command and store its output in buffer. Number of lines in buffer
  * is stored in buffer_size. Function skips lines starting with '#'.
@@ -64,16 +86,16 @@ char *trim(const char *str, const char *delims);
 bool is_vendor_like_dell(char *vendor);
 
 
-char * get_value_from_buffer(char *input, char **buffer, buffer_size);
+char * get_value_from_buffer(char *input, char **buffer,int buffer_size);
 
-struct _Bmc_info{
-    char **IP4Addresses;
-    char **IP6Addresses;
-    int vlan;
-    char *PermanentMACAddress;
-    char **BMC_URLs;
-    char *FirmwareVersion;
-    char **supportedProtos;
-    char **supportedProtoVersions;
-    char **active_nic;
-}BMC_info;
+int populate_dell_bmc_info(BMC_info *bmc_info);
+
+/*
+ * Empty up all the elements of BMC Info
+ * */
+void free_bmc_info( BMC_info *bmc_info);
+
+/*
+ * Allocate memory and initialize the elements of bmc_info
+ * */
+int init_bmc_info( BMC_info *bmc_info);
