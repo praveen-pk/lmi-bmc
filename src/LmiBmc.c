@@ -178,7 +178,7 @@ short run_command(const char *command, char ***buffer, unsigned *buffer_size)
         goto done;
     }
 
-    /* execute command */
+    /*execute command */
     lmi_debug("Running command: \"%s\"\n", command);
     fp = popen(command, "r");
     if (!fp) {
@@ -262,23 +262,23 @@ bool is_vendor_like_dell(char *vendor)
 bool command_exists (char *cmd)
 {
     int ret;
-    char  **buffer;
-    int buffer_size=0;
-    char *tmp_cmd_str = calloc (35+strlen(cmd),sizeof(char));
+    char *tmp_cmd_str = calloc (25+strlen(cmd),sizeof(char));
     if (tmp_cmd_str == NULL ){
-    //TODO: /*Handle calloc failure*/	
+	    lmi_error ("Failure while allocating memory in command_exists\n");
+	//TODO: Handle the failure here
     }
 
-    strcat (tmp_cmd_str, " which ");
+    strcat (tmp_cmd_str, "which ");
     strcat (tmp_cmd_str,cmd);
     strcat(tmp_cmd_str," > /dev/null 2>&1");
     ret = system(tmp_cmd_str);
+    free(tmp_cmd_str);	
     if (ret == 0)
     {
 	return true;
     }
     else{
-    return false;
+	return false;
     }
 
 }
@@ -309,26 +309,26 @@ char * get_value_from_buffer(char *input, char **buffer, int buffer_size)
 int populate_dell_bmc_info(BMC_info *bmc_info)
 {
     int buffer_size=0, tmp_len=0;
-    char **buffer;
+    char **buffer=NULL;
     char *tmp_str;
     int ret=0;
 
     if ( ! command_exists ("ipmitool ")){
 	lmi_error ("ipmitool comman doesn't exist. send empty instance");
+	//TODO: Handle Failure.
     }
-
-    if (run_command("ipmitool lan print 1", &buffer, &buffer_size) != 0) {
-//    if (run_command("cat ipmi_output", &buffer, &buffer_size) != 0) {
-        printf ( "Failed running the ipmitool command. Check if ipmi service is running \n");
+   // if (run_command("ipmitool lan print 1", &buffer, &buffer_size) != 0) {
+    if (run_command("cat /root/ipmi_output", &buffer, &buffer_size) != 0) {
+        printf ("Failed running the ipmitool command. Check if ipmi service is running \n");
 	goto failed;
     }
 
-    
+   lmi_debug ("After running ipmitool lan print  command\n"); 
     /*
  *  Populate only one IPV4 Address
  *  */
     tmp_str = get_value_from_buffer("IP Address", buffer,buffer_size);
-    bmc_info->IP4Addresses = (char **) pop_calloc(1, sizeof(char*),&&failed);
+    bmc_info->IP4Addresses = (char **) calloc(1, sizeof(char*));
     bmc_info->IP4Addresses[0] =tmp_str;
 
 /*Populate Netmask*/
@@ -368,9 +368,10 @@ int populate_dell_bmc_info(BMC_info *bmc_info)
 	bmc_info->vlan = 0;
     }
 
+    lmi_debug("Before running ipmitool mc info\n\n\n");
 
-    if (run_command("ipmitool mc info", &buffer, &buffer_size) != 0) {
-//    if (run_command("cat ipmi_mc_output", &buffer, &buffer_size) != 0) {
+//    if (run_command("ipmitool mc info", &buffer, &buffer_size) != 0) {
+    if (run_command("cat /root/ipmi_mc_output", &buffer, &buffer_size) != 0) {
         printf ( "Failed running the ipmitool command. Check if ipmi service is running \n");
         return 1;
     }
@@ -384,6 +385,8 @@ int populate_dell_bmc_info(BMC_info *bmc_info)
     strcpy(tmp_str,"IPMI");
     bmc_info->supportedProtos = (char**)calloc(1, sizeof(char*));
     bmc_info->supportedProtos[0] =tmp_str;
+    
+    lmi_debug("End of Populating\n");
 
     return 0;
 
@@ -449,7 +452,7 @@ int init_bmc_info( BMC_info *bmc_info)
     bmc_info->PermanentMACAddress=NULL;
 }
 
-main ()
+/*main ()
 {
     char *vendor=NULL;
     BMC_info *bmc_info;
@@ -461,6 +464,6 @@ main ()
     printf ("MAC: %s\n",bmc_info->PermanentMACAddress);
 
   
-}
+}*/
 
 

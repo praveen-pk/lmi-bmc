@@ -3,6 +3,9 @@ set(LIBRARY_NAME cmpiLMIBmc)
 set(MOF LMI_BMC.mof)
 set (CIM_CLASSES LMI_BMC)
 
+set(CMAKE_C_FLAGS "-std=c99 -Wall -W -Wformat-security -pedantic -g3 -Wextra -Wno-unused-parameter -Wformat -Wparentheses -Wl,--no-undefined ")
+
+
 set(LmiBmc_SRCS
     LmiBmc.c
 )

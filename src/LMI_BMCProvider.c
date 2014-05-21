@@ -1,5 +1,7 @@
 #include <konkret/konkret.h>
 #include "LMI_BMC.h"
+#include "LmiBmc.h"
+#include <string.h>
 
 static const CMPIBroker* _cb = NULL;
 
@@ -32,6 +34,28 @@ static CMPIStatus LMI_BMCEnumInstances(
     const CMPIObjectPath* cop,
     const char** properties)
 {
+    
+    //run_command()
+    CMReturn(CMPI_RC_OK);
+    BMC_info *bmc_info;
+    init_bmc_info (bmc_info); 
+    populate_dell_bmc_info (bmc_info);
+    lmi_debug ("Returning from Populating\n");
+    
+    LMI_BMC inst;
+    /* CIM_LogicalDevice features */
+    LMI_BMC_SetString_SystemCreationClassName (&inst,"LMI_BMC");
+    LMI_BMC_Init_IP4Addresses(&inst,1);
+    LMI_BMC_Set_IP4Addresses (&inst, 1, strdup(bmc_info->IP4Addresses[0]));
+    LMI_BMC_Init_IP4Netmasks(&inst,1);
+    LMI_BMC_Set_IP4Netmasks(&inst, 1, strdup(bmc_info->IP4Netmasks[0]));
+    LMI_BMC_SetString_IP4AddressSource(&inst,strdup(bmc_info->IP4AddressSource) );
+
+    
+    lmi_debug ("After Populating the structure\n");
+
+    free_bmc_info(bmc_info);
+    KReturnInstance(cr, inst);
     CMReturn(CMPI_RC_OK);
 }
 
