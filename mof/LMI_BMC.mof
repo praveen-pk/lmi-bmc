@@ -12,26 +12,26 @@ class LMI_BMC : CIM_ManagementController
 /* Multiple IP addresses causing too much complexity
 */
     [Description("This variable, should always capture the latest ipv4 IP/s addresses of BMC."),
-    ArrayType("Indexed"),
-    ModelCorrespondance{"LMI_BMC.IP4Netmasks"}]
+    ArrayType("Indexed")]
+ //   ModelCorrespondance{"LMI_BMC.IP4Netmasks"}]
     string IP4Addresses[];
 
     [Description("This variable, should always capture the  ipv4 NetMasks of BMC."),
-    ArrayType("Indexed"),
-    ModelCorrespondance{"LMI_BMC.IP4Addresses"}]
+    ArrayType("Indexed")]
+   // ModelCorrespondance{"LMI_BMC.IP4Addresses"}]
     string IP4Netmasks[];
 
     [Description("This variable captures if the IPv4 addresses are statically set or via DHCP. Possible values are 'DHCP Address'/ 'Static Address'")]
     string IP4AddressSource;
    
     [Description("This variable, should always capture the latest ipv6 IP/s addresses of BMC."),
-    ArrayType("Indexed"),
-    ModelCorrespondance{"LMI_BMC.IP6Netmasks"}]
+    ArrayType("Indexed")]
+//    ModelCorrespondance{"LMI_BMC.IP6Netmasks"}]
     string IP6Addresses[];
 
     [Description("This variable, should always capture the latest ipv6 Netmasks of BMC."),
-    ArrayType("Indexed"),
-    ModelCorrespondance{"LMI_BMC.IP6Addresses"}]
+    ArrayType("Indexed")]
+//    ModelCorrespondance{"LMI_BMC.IP6Addresses"}]
     string IP6Netmasks[];
 
     [Description("This variable captures if the IPv6 addresses are statically set or via DHCP. Possibel values are 'DHCP Address'/ 'Static Address'")]
@@ -55,13 +55,13 @@ class LMI_BMC : CIM_ManagementController
    
    [Description("This Array will capture the list of protocols supported by the BMC"),
     ArrayType ("Indexed"),
-    MaxLen (256),
-    ModelCorrespondence {"LMI_BMC.SupportedProtoVersion"}  ]
+    MaxLen (256)]
+//    ModelCorrespondence {"LMI_BMC.SupportedProtoVersion"}  ]
     string SupportedProtos[];
     
     [Description("This Array will capture the version of the supported protocol listed in the corresponding index of SupportedProtos "),
-    ArrayType ("Indexed"),
-    ModelCorrespondence {"LMI_BMC.SupportedProtos" } ]
+    ArrayType ("Indexed")]
+//    ModelCorrespondence {"LMI_BMC.SupportedProtos" } ]
     string SupportedProtoVersions[];
    
 
