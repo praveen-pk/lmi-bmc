@@ -3,7 +3,7 @@ set(LIBRARY_NAME cmpiLMIBmc)
 set(MOF LMI_BMC.mof)
 set (CIM_CLASSES LMI_BMC)
 
-set(CMAKE_C_FLAGS "-std=c99 -Wall -W -Wformat-security -pedantic -g3 -Wextra -Wno-unused-parameter -Wformat -Wparentheses -Wl,--no-undefined ")
+set(CMAKE_C_FLAGS " -W -Wformat-security -pedantic -g3 -Wextra -Wno-unused-parameter -Wformat -Wparentheses -Wl,--no-undefined ")
 
 
 set(LmiBmc_SRCS
@@ -26,7 +26,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMPI_INCLUDE_DIR}
     ${KONKRETCMPI_INCLUDE_DIR}
 )
 
-target_link_libraries(${LIBRARY_NAME} ${KONKRETCMPI_LIBRARIES})
+target_link_libraries(${LIBRARY_NAME}  openlmicommon ${KONKRETCMPI_LIBRARIES})
 
 # Create registration file
 cim_registration(${PROVIDER_NAME} ${LIBRARY_NAME} ${MOF} "")
