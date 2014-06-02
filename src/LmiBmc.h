@@ -67,7 +67,6 @@ short run_command(const char *command, char ***buffer, unsigned *buffer_size);
 void free_2d_buffer(char ***buffer, unsigned *buffer_size);
 
 
-
 /*
  * Create trimmed copy of given string. Trimmed will be any characters
  * found in delims parameter, or, if delims is NULL, any white space characters.
@@ -106,7 +105,17 @@ int init_bmc_info( BMC_info *bmc_info);
  * */
 char *get_bios_vendor();
 
+/*
+ * Based on the vendor set the maximums to capture.
+ * */
 void set_bmc_max_vars();
-void print_bmc_info ();
 
+/*
+ * Alocate and initialize a new BMC_info structure
+ * */
 BMC_info *alloc_init_bmc_info();
+
+/*
+ * Function to free an array of pointers
+ * */
+void free_list(char **list, int count);

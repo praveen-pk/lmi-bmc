@@ -58,6 +58,10 @@ static CMPIStatus LMI_BMCEnumInstances(
     { 
 	populate_dell_bmc_info(bmc_info);
     }
+    else {
+	lmi_error("Not a known Vendor.");
+	goto failed;
+    }
     if (bmc_info==NULL)
 	goto failed;
  
@@ -86,6 +90,7 @@ static CMPIStatus LMI_BMCEnumInstances(
     LMI_BMC_Init_BMC_URLs(&inst,1);
     LMI_BMC_Set_BMC_URLs(&inst,0,strdup(bmc_info->BMC_URLs[0]));
     LMI_BMC_Set_PermanentMACAddress(&inst, strdup(bmc_info->PermanentMACAddress));
+    LMI_BMC_Set_FirmwareVersion(&inst, strdup(bmc_info->FirmwareVersion));
 
     free_bmc_info(bmc_info);
     KReturnInstance(cr, inst);
@@ -93,6 +98,7 @@ static CMPIStatus LMI_BMCEnumInstances(
 
 
     failed:
+    
     CMReturn(CMPI_RC_OK);
 //TODO: Return an empty instance.
 }

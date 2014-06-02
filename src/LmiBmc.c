@@ -7,18 +7,17 @@
 #include "LMI_BMC.h"
 
 /*
- *  * This variable captures the maximum number 
- *   * of IP address that can be assigned to a BMC.
- *    * This variable will be set, based on the system manufacturer.
- *     * The max # of entries in IP4Addresses/IPv6Addresses  arrays will be captured 
- *      * in this variable.
- *       * */
+ * This variable captures the maximum number 
+ * of IP address that can be assigned to a BMC.
+ * This variable will be set, based on the system manufacturer.
+ * The max # of entries in IP4Addresses/IPv6Addresses  arrays will be captured in this variable.
+ */
 int bmc_max_ips = 0;
 
 /*
- *  * This variable will capture the maximum number of protocols supported for remote access.
- *   * This variable is all set based on the system Manufacturer.
- *    */
+ * This variable will capture the maximum number of protocols supported for remote access.
+ * This variable is also set based on the system Manufacturer.
+ */
 int bmc_max_protos = 0;
 
 
@@ -285,7 +284,7 @@ bool command_exists (char *cmd)
     char *tmp_cmd_str = calloc (25+strlen(cmd),sizeof(char));
     if (tmp_cmd_str == NULL ){
 	    lmi_error ("Failure while allocating memory in command_exists\n");
-	//TODO: Handle the failure here
+	return false;
     }
 
     strcat (tmp_cmd_str, "which ");
@@ -333,14 +332,13 @@ int populate_dell_bmc_info(BMC_info *bmc_info)
     char *tmp_str;
     int ret=0;
 
-    if ( ! command_exists ("ipmitool ")){
+    if (! command_exists ("ipmitool ")){
 	lmi_error ("ipmitool comman doesn't exist. send empty instance");
 	goto failed;	    
     }
-   //if (run_command("ipmitool lan print 1", &buffer, &buffer_size) != 0) 
-   if (run_command("cat /root/ipmi_output", &buffer, &buffer_size) != 0) 
+   if (run_command("ipmitool lan print 1", &buffer, &buffer_size) != 0) 
     {
-        printf ("Failed running the ipmitool command. Check if ipmi service is running \n");
+        lmi_error ("Failed running the ipmitool command. Check if ipmi service is running \n");
 	goto failed;
     }
 
@@ -357,14 +355,20 @@ int populate_dell_bmc_info(BMC_info *bmc_info)
     tmp_str = get_value_from_buffer("Subnet Mask", buffer,buffer_size);
     bmc_info->IP4Netmasks = (char**)calloc(1, sizeof(char*));
     if (bmc_info->IP4Netmasks == NULL)
+    {
+	lmi_error ("Failed while allocating memory");
 	goto failed;
+    }
     bmc_info->IP4Netmasks[0] =tmp_str;
 
 /*Populate IP Source*/   
     tmp_str = get_value_from_buffer("IP Address Source", buffer,buffer_size);
     bmc_info->IP4AddressSource = (char*)calloc(1, sizeof(char*));
     if (bmc_info->IP4AddressSource == NULL)
+    {
+	lmi_error ("Failed while allocating memory");
 	goto failed;
+    }
     bmc_info->IP4AddressSource =tmp_str;
 
     /*IPv6 address not supported yet*/
@@ -376,49 +380,84 @@ int populate_dell_bmc_info(BMC_info *bmc_info)
     tmp_str = get_value_from_buffer("MAC Address", buffer,buffer_size);
     bmc_info->PermanentMACAddress = (char *)calloc(1, sizeof(char*));
     if (bmc_info->PermanentMACAddress == NULL)
+    {
+	lmi_error ("Failed while allocating memory");
 	goto failed; 
+    }
     bmc_info->PermanentMACAddress = tmp_str;
     
 /* Only have one URL */
     bmc_info->BMC_URLs = (char **)calloc( 1 ,sizeof(char*));
     if (bmc_info->BMC_URLs == NULL)
+    {
+	lmi_error ("Failed while allocating memory");
 	goto failed; 
+    }
     tmp_str = (char *) calloc(10+strlen(bmc_info->IP4Addresses[0]), sizeof(char));
+    if (tmp_str == NULL)
+    {
+	lmi_error ("Failed while allocating memory");
+	goto failed; 
+    }
     strcpy(tmp_str,"https://");
     strcat (tmp_str,bmc_info->IP4Addresses[0]);
     bmc_info->BMC_URLs[0] = tmp_str ;
-    
-    if ( strcmp( get_value_from_buffer("802.1q VLAN ID", buffer,buffer_size), "Disabled"  ) == 0 )
+   
+    tmp_str = get_value_from_buffer("802.1q VLAN ID", buffer,buffer_size); 
+    if ( strcmp( tmp_str , "Disabled"  ) == 0 )
     {
+	free (tmp_str);
 	bmc_info->vlan = 0;
     }
-
-    lmi_debug("Before running ipmitool mc info\n\n\n");
-
-    //if (run_command("ipmitool mc info", &buffer, &buffer_size) != 0) 
-    if (run_command("cat /root/ipmi_mc_output", &buffer, &buffer_size) != 0) 
+    else
     {
-        printf ( "Failed running the ipmitool command. Check if ipmi service is running \n");
-        return 1;
+	bmc_info->vlan = atoi(tmp_str);
+	free(tmp_str);
+    } 
+	
+
+    if (run_command("ipmitool mc info", &buffer, &buffer_size) != 0) 
+    {
+        lmi_error( "Failed running the ipmitool command. Check if ipmi service is running \n");
+        goto failed;
     }
 
 /*IPMI Version*/
     tmp_str = get_value_from_buffer("IPMI Version", buffer,buffer_size);
     bmc_info->supportedProtoVersions = (char**)calloc(1, sizeof(char*));
     if (bmc_info->supportedProtoVersions == NULL)
+    {	
+	lmi_error ("Failed while allocating memory");	
 	goto failed; 
+    }
     bmc_info->supportedProtoVersions[0] =tmp_str;
    
     tmp_str = calloc(4, sizeof(char));
+    if (tmp_str == NULL)
+    {	
+	lmi_error ("Failed while allocating memory");	
+	goto failed; 
+    }
     strcpy(tmp_str,"IPMI");
     bmc_info->supportedProtos = (char**)calloc(1, sizeof(char*));
     if (bmc_info->supportedProtos == NULL)
+    {
+	lmi_error("Failed while allocating memory");
 	goto failed; 
+    }
+    bmc_info->supportedProtos[0] = tmp_str;
 
-    bmc_info->supportedProtos[0] =tmp_str;
+
+    tmp_str = get_value_from_buffer("Firmware Revision", buffer, buffer_size);
+    bmc_info->FirmwareVersion = calloc(1, sizeof(char*));
+    if (bmc_info->FirmwareVersion == NULL)
+    {	
+	lmi_error ("Failed while allocating memory");	
+	goto failed; 
+    }
+    bmc_info->FirmwareVersion = tmp_str;
     
-    //lmi_debug("End of Populating\n");
-
+    
     return 0;
 
 failed:
@@ -429,38 +468,6 @@ failed:
 }
 
 
-void print_bmc_info()
-{
-    char *tmp_str, **buffer=NULL;
-    int buffer_size=0;
-    char *line;
-    ssize_t read;
-    int line_len=128;
-    FILE *fpp;
-    perror ("Start of print_bmc_info");   
-    
-   line = calloc (line_len, sizeof (char));
-  //  line = NULL;
-         
-  //fpp = popen("/usr/bin/cat /root/ipmi_output > /tmp/tmp 2>&1","r");
- // pclose (fpp);   
-
-  fpp = popen("/usr/bin/cat /root/ipmi_output","r");
-  if (fpp == NULL || fpp == -1)   
-    perror ("AFTER POPEN");   
-
-  lmi_debug ("After running ipmitool lan print  command\n"); 
-
-  while ((read = getline(&line, &line_len, fpp)) != -1  ){
-	perror ("AFTER POPEN");   
-	printf ("%s", line);
-    }
-
- pclose(fpp);
- free (line);    
-return;
-}
-
 void free_bmc_info( BMC_info *bmc_info)
 {
 
@@ -468,14 +475,37 @@ int i = 0;
 
 free_list(bmc_info->IP4Addresses,bmc_max_ips);
 free_list(bmc_info->IP4Netmasks,bmc_max_ips);
+free_list(bmc_info->IP6Addresses,bmc_max_ips);
+free_list(bmc_info->IP6Netmasks,bmc_max_ips);
 
+if(bmc_info->PermanentMACAddress != NULL)
+{
+    free (bmc_info->PermanentMACAddress);
+    bmc_info->PermanentMACAddress=NULL;
+}
 
-free(bmc_info->PermanentMACAddress);
+if (bmc_info->IP6AddressSource !=NULL)
+{
+    free (bmc_info->IP6AddressSource);
+    bmc_info->IP6AddressSource=NULL;
+}
+free_list(bmc_info->BMC_URLs, 1);
+if (bmc_info-> FirmwareVersion!=NULL)
+{
+    free (bmc_info->FirmwareVersion);
+    bmc_info->FirmwareVersion=NULL;
+}
+
+if (bmc_info-> active_nic!=NULL)
+{
+    free (bmc_info->active_nic);
+    bmc_info->active_nic=NULL;
+}
+
 free_list(bmc_info->supportedProtos, bmc_max_protos);
 free_list(bmc_info->supportedProtoVersions, bmc_max_protos);  
-//TODO: Handle the remaining elements too. 
-
 free (bmc_info);
+bmc_info=NULL;    
 }
 
 
@@ -488,9 +518,11 @@ void free_list(char **list, int count)
 	for (i=0;i<count; i++)
 	{
 	    free(list[i]);
+	    list[i]=NULL;
 	}
 	free(list);
     }
+   list = NULL; 
 }
 
 
@@ -532,19 +564,4 @@ void set_bmc_max_vars()
     }
 
 }
-
-/*main ()
-{
-    char *vendor=NULL;
-    BMC_info *bmc_info;
-    init_bmc_info (bmc_info);
-
-    populate_dell_bmc_info (bmc_info);
-    printf ("IP: %s\n",bmc_info->IP4Addresses[0]);
-    printf ("IP: %s\n",bmc_info->IP4AddressSource);
-    printf ("MAC: %s\n",bmc_info->PermanentMACAddress);
-
-  
-}*/
-
 
