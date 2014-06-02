@@ -3,10 +3,18 @@
 #include "LmiBmc.h"
 #include <string.h>
 
+extern int bmc_max_ips, bmc_max_protos;
+ 
 static const CMPIBroker* _cb = NULL;
 
 static void LMI_BMCInitialize()
 {
+
+/*
+ * Based on the system Vendor, set the global max variables.
+ */ 
+    set_bmc_max_vars();
+
 }
 
 static CMPIStatus LMI_BMCCleanup(
@@ -34,29 +42,59 @@ static CMPIStatus LMI_BMCEnumInstances(
     const CMPIObjectPath* cop,
     const char** properties)
 {
-    
-    //run_command()
-    CMReturn(CMPI_RC_OK);
+    const char *ns = KNameSpace(cop);
+    CMPIString *x = lmi_get_system_creation_class_name();
     BMC_info *bmc_info;
-    init_bmc_info (bmc_info); 
-    populate_dell_bmc_info (bmc_info);
-    lmi_debug ("Returning from Populating\n");
-    
-    LMI_BMC inst;
-    /* CIM_LogicalDevice features */
-    LMI_BMC_SetString_SystemCreationClassName (&inst,"LMI_BMC");
-    LMI_BMC_Init_IP4Addresses(&inst,1);
-    LMI_BMC_Set_IP4Addresses (&inst, 1, strdup(bmc_info->IP4Addresses[0]));
-    LMI_BMC_Init_IP4Netmasks(&inst,1);
-    LMI_BMC_Set_IP4Netmasks(&inst, 1, strdup(bmc_info->IP4Netmasks[0]));
-    LMI_BMC_SetString_IP4AddressSource(&inst,strdup(bmc_info->IP4AddressSource) );
+    int i=0;
 
-    
-    lmi_debug ("After Populating the structure\n");
+    bmc_info = (BMC_info *) alloc_init_bmc_info ();
+    if (bmc_info == NULL)
+    {
+	lmi_error("Allocation of BMC Info failed.");
+	goto failed;
+    }
+
+    if ( is_vendor_like_dell (get_bios_vendor() ) )
+    { 
+	populate_dell_bmc_info(bmc_info);
+    }
+    if (bmc_info==NULL)
+	goto failed;
+ 
+
+    LMI_BMC inst;
+    LMI_BMC_Init(&inst,_cb,ns );
+    /*TODO: CIM_LogicalDevice features */
+    LMI_BMC_Set_SystemCreationClassName (&inst,lmi_get_system_creation_class_name());
+    LMI_BMC_Init_IP4Addresses(&inst,bmc_max_ips);
+    for (i=0;i<bmc_max_ips;i++)
+    { 
+	LMI_BMC_Set_IP4Addresses (&inst, i, strdup(bmc_info->IP4Addresses[i]));
+    }
+
+    LMI_BMC_Init_IP4Netmasks(&inst,bmc_max_ips);
+
+    for (i=0;i<bmc_max_ips;i++)
+    {
+	LMI_BMC_Set_IP4Netmasks(&inst, i, strdup(bmc_info->IP4Netmasks[i]));    
+    }
+
+    LMI_BMC_Set_IP4AddressSource(&inst,strdup(bmc_info->IP4AddressSource));
+
+   
+    printf("BMC_URL=%s",bmc_info->BMC_URLs[0]); 
+    LMI_BMC_Init_BMC_URLs(&inst,1);
+    LMI_BMC_Set_BMC_URLs(&inst,0,strdup(bmc_info->BMC_URLs[0]));
+    LMI_BMC_Set_PermanentMACAddress(&inst, strdup(bmc_info->PermanentMACAddress));
 
     free_bmc_info(bmc_info);
     KReturnInstance(cr, inst);
     CMReturn(CMPI_RC_OK);
+
+
+    failed:
+    CMReturn(CMPI_RC_OK);
+//TODO: Return an empty instance.
 }
 
 static CMPIStatus LMI_BMCGetInstance(

@@ -6,10 +6,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <string.h>
 #include <errno.h>
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
+
+#include <openlmi/openlmi.h>
 
 
 #define DELL_LIKE_VENDORS "Dell Inc, Dell"
@@ -21,15 +24,13 @@
 #define  lmi_debug(...)  printf("\nDEBUG:");  printf(__VA_ARGS__)
 #define  lmi_error(...)  printf("\nERROR:");  printf(__VA_ARGS__)
 
-
-
-inline void * pop_calloc (size_t nmemb,size_t size,void *failed){
+/*inline void * pop_calloc (size_t nmemb,size_t size,void *failed){
 	void *tmp_ptr = calloc(nmemb, size);
 	if (tmp_ptr == NULL)
 	    goto *failed;
 	return tmp_ptr;
     }
-
+*/
 typedef struct _Bmc_info{
     char **IP4Addresses;
     char **IP4Netmasks;
@@ -43,7 +44,7 @@ typedef struct _Bmc_info{
     char *FirmwareVersion;
     char **supportedProtos;
     char **supportedProtoVersions;
-    char **active_nic;
+    char *active_nic;
 } BMC_info;
 /*
  * Run given command and store its output in buffer. Number of lines in buffer
@@ -99,3 +100,13 @@ void free_bmc_info( BMC_info *bmc_info);
  * Allocate memory and initialize the elements of bmc_info
  * */
 int init_bmc_info( BMC_info *bmc_info);
+
+/*
+ * Function to return the BIOS Vendor
+ * */
+char *get_bios_vendor();
+
+void set_bmc_max_vars();
+void print_bmc_info ();
+
+BMC_info *alloc_init_bmc_info();
