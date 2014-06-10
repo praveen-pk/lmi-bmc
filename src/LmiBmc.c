@@ -471,41 +471,41 @@ failed:
 void free_bmc_info( BMC_info *bmc_info)
 {
 
-int i = 0;
+    int i = 0;
 
-free_list(bmc_info->IP4Addresses,bmc_max_ips);
-free_list(bmc_info->IP4Netmasks,bmc_max_ips);
-free_list(bmc_info->IP6Addresses,bmc_max_ips);
-free_list(bmc_info->IP6Netmasks,bmc_max_ips);
+    free_list(bmc_info->IP4Addresses,bmc_max_ips);
+    free_list(bmc_info->IP4Netmasks,bmc_max_ips);
+    free_list(bmc_info->IP6Addresses,bmc_max_ips);
+    free_list(bmc_info->IP6Netmasks,bmc_max_ips);
 
-if(bmc_info->PermanentMACAddress != NULL)
-{
-    free (bmc_info->PermanentMACAddress);
-    bmc_info->PermanentMACAddress=NULL;
-}
+    if(bmc_info->PermanentMACAddress != NULL)
+    {
+	free (bmc_info->PermanentMACAddress);
+	bmc_info->PermanentMACAddress=NULL;
+    }
 
-if (bmc_info->IP6AddressSource !=NULL)
-{
-    free (bmc_info->IP6AddressSource);
-    bmc_info->IP6AddressSource=NULL;
-}
-free_list(bmc_info->BMC_URLs, 1);
-if (bmc_info-> FirmwareVersion!=NULL)
-{
-    free (bmc_info->FirmwareVersion);
-    bmc_info->FirmwareVersion=NULL;
-}
+    if (bmc_info->IP6AddressSource !=NULL)
+    {
+	free (bmc_info->IP6AddressSource);
+	bmc_info->IP6AddressSource=NULL;
+    }
+    free_list(bmc_info->BMC_URLs, 1);
+    if (bmc_info-> FirmwareVersion!=NULL)
+    {
+	free (bmc_info->FirmwareVersion);
+	bmc_info->FirmwareVersion=NULL;
+    }
 
-if (bmc_info-> active_nic!=NULL)
-{
-    free (bmc_info->active_nic);
-    bmc_info->active_nic=NULL;
-}
+    if (bmc_info-> active_nic!=NULL)
+    {
+	free (bmc_info->active_nic);
+	bmc_info->active_nic=NULL;
+    }
 
-free_list(bmc_info->supportedProtos, bmc_max_protos);
-free_list(bmc_info->supportedProtoVersions, bmc_max_protos);  
-free (bmc_info);
-bmc_info=NULL;    
+    free_list(bmc_info->supportedProtos, bmc_max_protos);
+    free_list(bmc_info->supportedProtoVersions, bmc_max_protos);  
+    free (bmc_info);
+    bmc_info=NULL;    
 }
 
 
@@ -528,7 +528,6 @@ void free_list(char **list, int count)
 
 BMC_info *  alloc_init_bmc_info( )
 {
-
 
     BMC_info *bmc_info = (BMC_info *) calloc(1, sizeof(BMC_info));
     if (bmc_info == NULL)
@@ -557,11 +556,13 @@ BMC_info *  alloc_init_bmc_info( )
 
 void set_bmc_max_vars()
 {
-    if ( is_vendor_like_dell (get_bios_vendor() ) )
+    char *vendor = get_bios_vendor();
+    if ( is_vendor_like_dell (vendor ))
     {
-	bmc_max_ips =1 ;
-	bmc_max_protos =1 ;
+	bmc_max_ips = 1 ;
+	bmc_max_protos = 1 ;
     }
+    free (vendor);
 
 }
 

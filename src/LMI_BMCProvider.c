@@ -44,8 +44,16 @@ static CMPIStatus LMI_BMCEnumInstances(
 {
     const char *ns = KNameSpace(cop);
     CMPIString *x = lmi_get_system_creation_class_name();
-    BMC_info *bmc_info;
+    BMC_info *bmc_info = NULL;
     int i=0;
+    char *vendor = NULL;
+    
+    vendor = get_bios_vendor();
+    if (vendor == NULL)
+    {
+	lmi_error("Not able to determine the System Vendor");
+	goto failed;
+    }
 
     bmc_info = (BMC_info *) alloc_init_bmc_info ();
     if (bmc_info == NULL)
@@ -54,14 +62,16 @@ static CMPIStatus LMI_BMCEnumInstances(
 	goto failed;
     }
 
-    if ( is_vendor_like_dell (get_bios_vendor() ) )
+    if ( is_vendor_like_dell (vendor) )
     { 
 	populate_dell_bmc_info(bmc_info);
     }
-    else {
+    else 
+    {
 	lmi_error("Not a known Vendor.");
 	goto failed;
     }
+
     if (bmc_info==NULL)
 	goto failed;
  
@@ -86,21 +96,22 @@ static CMPIStatus LMI_BMCEnumInstances(
     LMI_BMC_Set_IP4AddressSource(&inst,strdup(bmc_info->IP4AddressSource));
 
    
-    printf("BMC_URL=%s",bmc_info->BMC_URLs[0]); 
     LMI_BMC_Init_BMC_URLs(&inst,1);
     LMI_BMC_Set_BMC_URLs(&inst,0,strdup(bmc_info->BMC_URLs[0]));
     LMI_BMC_Set_PermanentMACAddress(&inst, strdup(bmc_info->PermanentMACAddress));
     LMI_BMC_Set_FirmwareVersion(&inst, strdup(bmc_info->FirmwareVersion));
 
     free_bmc_info(bmc_info);
+    free (vendor);
     KReturnInstance(cr, inst);
     CMReturn(CMPI_RC_OK);
 
 
-    failed:
-    
-    CMReturn(CMPI_RC_OK);
+failed:
+    free (vendor);
+    free_bmc_info(bmc_info);
 //TODO: Return an empty instance.
+    CMReturn(CMPI_RC_OK);
 }
 
 static CMPIStatus LMI_BMCGetInstance(
