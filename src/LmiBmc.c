@@ -196,7 +196,7 @@ short run_command(const char *command, char ***buffer, unsigned *buffer_size)
     }
 
     /*execute command */
-    lmi_debug("Running command: \"%s\"\n", command);
+    /*lmi_debug("Running command: \"%s\"\n", command);*/
     fp = popen(command, "r");
     if (!fp) {
         lmi_warn("Failed to run command: \"%s\"; Error: %s",
@@ -461,7 +461,6 @@ int populate_dell_bmc_info(BMC_info *bmc_info)
     return 0;
 
 failed:
-    printf ("One of the allocations failed. Returning NULL");
     free_bmc_info(bmc_info);
     return 1;
 
@@ -471,7 +470,8 @@ failed:
 void free_bmc_info( BMC_info *bmc_info)
 {
 
-    int i = 0;
+    if (bmc_info == NULL)
+	return;	
 
     free_list(bmc_info->IP4Addresses,bmc_max_ips);
     free_list(bmc_info->IP4Netmasks,bmc_max_ips);
@@ -505,7 +505,7 @@ void free_bmc_info( BMC_info *bmc_info)
     free_list(bmc_info->supportedProtos, bmc_max_protos);
     free_list(bmc_info->supportedProtoVersions, bmc_max_protos);  
     free (bmc_info);
-    bmc_info=NULL;    
+
 }
 
 

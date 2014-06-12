@@ -47,11 +47,14 @@ static CMPIStatus LMI_BMCEnumInstances(
     BMC_info *bmc_info = NULL;
     int i=0;
     char *vendor = NULL;
+    char *errstr = NULL;
+    CMPIrc rc;
     
     vendor = get_bios_vendor();
     if (vendor == NULL)
     {
 	lmi_error("Not able to determine the System Vendor");
+	asprintf (&errstr,"Not able to determine the System Vendor\n" );
 	goto failed;
     }
 
@@ -64,17 +67,22 @@ static CMPIStatus LMI_BMCEnumInstances(
 
     if ( is_vendor_like_dell (vendor) )
     { 
-	populate_dell_bmc_info(bmc_info);
+	if (populate_dell_bmc_info(bmc_info)){
+	    /*bmc_info is already de-allocated, set it to NULL*/
+	    bmc_info=NULL;
+	    rc=CMPI_RC_ERR_FAILED;
+	    asprintf(&errstr,"Failed running the ipmitool command. Check if ipmi service is running");
+	    goto failed;
+	    
+	}
     }
     else 
     {
-	lmi_error("Not a known Vendor.");
+	rc=CMPI_RC_ERR_FAILED;
+	asprintf(&errstr,"BIOS vendor: %s is NOT SUPPORTED", vendor);
 	goto failed;
     }
 
-    if (bmc_info==NULL)
-	goto failed;
- 
 
     LMI_BMC inst;
     LMI_BMC_Init(&inst,_cb,ns );
@@ -111,7 +119,14 @@ failed:
     free (vendor);
     free_bmc_info(bmc_info);
 //TODO: Return an empty instance.
-    CMReturn(CMPI_RC_OK);
+    if (errstr){
+	
+	CMReturnWithChars(_cb, CMPI_RC_ERR_FAILED, errstr);
+    }
+    else
+    {
+	CMReturn(CMPI_RC_ERROR);
+    }
 }
 
 static CMPIStatus LMI_BMCGetInstance(

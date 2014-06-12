@@ -93,7 +93,7 @@ int populate_dell_bmc_info(BMC_info *bmc_info);
 /*
  * Empty up all the elements of BMC Info
  * */
-void free_bmc_info( BMC_info *bmc_info);
+void free_bmc_info( BMC_info *bmc_info_ptr);
 
 /*
  * Allocate memory and initialize the elements of bmc_info
