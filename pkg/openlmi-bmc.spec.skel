@@ -1,0 +1,42 @@
+
+%global logfile %{_localstatedir}/log/openlmi-install.log
+%global omr %{_bindir}/openlmi-mof-register
+
+Name: openlmi-bmc
+Version: @LMIBMC_VERSION@
+Release: 1%{?dist}
+
+Source: openlmi-bmc-@LMIBMC_VERSION@.tar.gz
+BuildRequires: cmake
+BuildRequires: openlmi-providers-devel >= 0.4.1
+
+Requires: konkretcmpi
+Requires: libwsman1
+Requires: cim-server
+Requires: openlmi-providers >= 0.4.1
+Requires: ipmitool
+Requires: OpenIPMI
+
+Summary: CMPI provider for BMC management
+Group: Applications/System
+License: LGPLv2+
+%description
+CMPI provider for managing publishing and managing the configuraiton of the BMC.
+
+%prep
+%setup -q
+
+%build
+mkdir -p build
+pushd build
+cmake ..
+
+popd
+
+%install
+make install DESTDIR=$RPM_BUILD_ROOT -C build
+
+%files
+%{_libdir}/cmpi/*
+
+
