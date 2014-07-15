@@ -33,3 +33,4 @@ cim_registration(${PROVIDER_NAME} ${LIBRARY_NAME} ${MOF} "")
 
 install(TARGETS ${LIBRARY_NAME} DESTINATION /usr/lib${LIB_SUFFIX}/cmpi/)
 
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/LMI_BMC.reg DESTINATION share/openlmi-providers/)
