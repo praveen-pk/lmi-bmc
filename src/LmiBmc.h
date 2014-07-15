@@ -15,7 +15,7 @@
 #include <openlmi/openlmi.h>
 
 
-#define DELL_LIKE_VENDORS "Dell Inc, Dell"
+#define DELL_LIKE_VENDORS "Dell Inc, Dell, Dell Computer Corporation"
 #define BUFLEN 1024
 #define WHITESPACES " \f\n\r\t\v"
 #define IPv4_Add_Size 11
