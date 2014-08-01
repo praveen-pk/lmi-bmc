@@ -109,6 +109,16 @@ static CMPIStatus LMI_BMCEnumInstances(
     LMI_BMC_Set_PermanentMACAddress(&inst, strdup(bmc_info->PermanentMACAddress));
     LMI_BMC_Set_FirmwareVersion(&inst, strdup(bmc_info->FirmwareVersion));
 
+    /*Set the List of Supported Protocols here. First one will be IPMI. Later on also capture WSMAN if possible*/
+    LMI_BMC_Init_SupportedProtos(&inst,bmc_max_protos);
+    LMI_BMC_Init_SupportedProtoVersions(&inst,bmc_max_protos);
+    
+    for (i=0; i<bmc_max_protos; i++)
+    {
+	LMI_BMC_Set_SupportedProtos(&inst, i, strdup(bmc_info->supportedProtos[i]));
+	LMI_BMC_Set_SupportedProtoVersions(&inst, i, strdup(bmc_info->supportedProtoVersions[i]));
+    }
+
     free_bmc_info(bmc_info);
     free (vendor);
     KReturnInstance(cr, inst);
