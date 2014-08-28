@@ -16,6 +16,7 @@
 
 
 #define DELL_LIKE_VENDORS "Dell Inc, Dell, Dell Computer Corporation"
+#define IPMI_SUPPORTING_VENDORS "Dell Inc, Dell, Dell Computer Corporation"
 #define BUFLEN 1024
 #define WHITESPACES " \f\n\r\t\v"
 #define IPv4_Add_Size 11
@@ -85,10 +86,25 @@ char *trim(const char *str, const char *delims);
  * */
 bool is_vendor_like_dell(char *vendor);
 
+/*
+ * From a known list, check if the vendor supports IPMI. If IPMI is suppor-
+ * ted and doesn't work properly, return an ERROR. 
+ * If IPMI is not supported, fall back to other interfaces.
+ * */
+bool does_vendor_support_ipmi(char *vendor);
+
 
 char * get_value_from_buffer(char *input, char **buffer,int buffer_size);
 
+/*
+ * Function populate the temporary BMC_info structure
+ * */
 int populate_dell_bmc_info(BMC_info *bmc_info);
+
+/*
+ * Function populate the temporary BMC_info structure
+ * */
+int populate_bmc_info_with_ipmi(BMC_info *bmc_info);
 
 /*
  * Empty up all the elements of BMC Info

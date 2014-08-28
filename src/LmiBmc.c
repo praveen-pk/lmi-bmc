@@ -278,6 +278,30 @@ done:
     return false;
      
 }
+
+ bool does_vendor_support_ipmi(char *vendor)
+{
+    
+    const char delim[2]=",";
+    char *tmp_ven;
+    char *vendor_list = strdup ( (char * ) IPMI_SUPPORTING_VENDORS);
+    tmp_ven = strtok (vendor_list, delim );
+    tmp_ven = trim (tmp_ven,NULL); 
+    while ( tmp_ven != NULL)
+    {
+	if (strcmp (tmp_ven, vendor) == 0 ){
+	    return true;
+	}
+
+	tmp_ven = strtok(NULL,delim);
+	tmp_ven = trim (tmp_ven,NULL); 
+	
+    }
+    return false;
+     
+}
+
+
 bool command_exists (char *cmd)
 {
     int ret;
@@ -325,7 +349,7 @@ char * get_value_from_buffer(char *input, char **buffer, int buffer_size)
 
 
 
-int populate_dell_bmc_info(BMC_info *bmc_info)
+int populate_bmc_info_with_ipmi(BMC_info *bmc_info)
 {
     int buffer_size=0, tmp_len=0;
     char **buffer=NULL;

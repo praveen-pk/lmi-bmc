@@ -65,9 +65,9 @@ static CMPIStatus LMI_BMCEnumInstances(
 	goto failed;
     }
 
-    if ( is_vendor_like_dell (vendor) )
+    if ( does_vendor_support_ipmi (vendor) )
     { 
-	if (populate_dell_bmc_info(bmc_info)){
+	if (populate_bmc_info_with_ipmi(bmc_info)){
 	    /*bmc_info is already de-allocated, set it to NULL*/
 	    bmc_info=NULL;
 	    rc=CMPI_RC_ERR_FAILED;
@@ -78,6 +78,7 @@ static CMPIStatus LMI_BMCEnumInstances(
     }
     else 
     {
+	/*Fallback to interfaces other than IPMI here*/
 	rc=CMPI_RC_ERR_FAILED;
 	asprintf(&errstr,"BIOS vendor: %s is NOT SUPPORTED", vendor);
 	goto failed;
