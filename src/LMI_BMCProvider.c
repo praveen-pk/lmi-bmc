@@ -4,7 +4,7 @@
 #include <string.h>
 
 extern int bmc_max_ips, bmc_max_protos;
- 
+
 static const CMPIBroker* _cb = NULL;
 
 static void LMI_BMCInitialize()
@@ -12,7 +12,7 @@ static void LMI_BMCInitialize()
 
 /*
  * Based on the system Vendor, set the global max variables.
- */ 
+ */
     set_bmc_max_vars();
 
 }
@@ -49,7 +49,7 @@ static CMPIStatus LMI_BMCEnumInstances(
     char *vendor = NULL;
     char *errstr = NULL;
     CMPIrc rc;
-    
+
     vendor = get_bios_vendor();
     if (vendor == NULL)
     {
@@ -66,17 +66,17 @@ static CMPIStatus LMI_BMCEnumInstances(
     }
 
     if ( does_vendor_support_ipmi (vendor) )
-    { 
+    {
 	if (populate_bmc_info_with_ipmi(bmc_info)){
 	    /*bmc_info is already de-allocated, set it to NULL*/
 	    bmc_info=NULL;
 	    rc=CMPI_RC_ERR_FAILED;
 	    asprintf(&errstr,"Failed running the ipmitool command. Check if ipmi service is running");
 	    goto failed;
-	    
+
 	}
     }
-    else 
+    else
     {
 	/*Fallback to interfaces other than IPMI here*/
 	rc=CMPI_RC_ERR_FAILED;
@@ -91,7 +91,7 @@ static CMPIStatus LMI_BMCEnumInstances(
     LMI_BMC_Set_SystemCreationClassName (&inst,lmi_get_system_creation_class_name());
     LMI_BMC_Init_IP4Addresses(&inst,bmc_max_ips);
     for (i=0;i<bmc_max_ips;i++)
-    { 
+    {
 	LMI_BMC_Set_IP4Addresses (&inst, i, strdup(bmc_info->IP4Addresses[i]));
     }
 
@@ -99,12 +99,12 @@ static CMPIStatus LMI_BMCEnumInstances(
 
     for (i=0;i<bmc_max_ips;i++)
     {
-	LMI_BMC_Set_IP4Netmasks(&inst, i, strdup(bmc_info->IP4Netmasks[i]));    
+	LMI_BMC_Set_IP4Netmasks(&inst, i, strdup(bmc_info->IP4Netmasks[i]));
     }
 
     LMI_BMC_Set_IP4AddressSource(&inst,strdup(bmc_info->IP4AddressSource));
 
-   
+
     LMI_BMC_Init_BMC_URLs(&inst,1);
     LMI_BMC_Set_BMC_URLs(&inst,0,strdup(bmc_info->BMC_URLs[0]));
     LMI_BMC_Set_PermanentMACAddress(&inst, strdup(bmc_info->PermanentMACAddress));
@@ -113,7 +113,7 @@ static CMPIStatus LMI_BMCEnumInstances(
     /*Set the List of Supported Protocols here. First one will be IPMI. Later on also capture WSMAN if possible*/
     LMI_BMC_Init_SupportedProtos(&inst,bmc_max_protos);
     LMI_BMC_Init_SupportedProtoVersions(&inst,bmc_max_protos);
-    
+
     for (i=0; i<bmc_max_protos; i++)
     {
 	LMI_BMC_Set_SupportedProtos(&inst, i, strdup(bmc_info->supportedProtos[i]));
@@ -131,7 +131,7 @@ failed:
     free_bmc_info(bmc_info);
 //TODO: Return an empty instance.
     if (errstr){
-	
+
 	CMReturnWithChars(_cb, CMPI_RC_ERR_FAILED, errstr);
     }
     else

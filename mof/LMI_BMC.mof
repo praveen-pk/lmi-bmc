@@ -7,7 +7,7 @@
 
 [Description("Model an Out of Band Management Controller and capture its features and capabilities")]
 class LMI_BMC : CIM_ManagementController
-{                                                    
+{
 
 /* Multiple IP addresses causing too much complexity
 */
@@ -23,7 +23,7 @@ class LMI_BMC : CIM_ManagementController
 
     [Description("This variable captures if the IPv4 addresses are statically set or via DHCP. Possible values are 'DHCP Address'/ 'Static Address'")]
     string IP4AddressSource;
-   
+
     [Description("This variable, should always capture the latest ipv6 IP/s addresses of BMC."),
     ArrayType("Indexed")]
 //    ModelCorrespondance{"LMI_BMC.IP6Netmasks"}]
@@ -41,38 +41,38 @@ class LMI_BMC : CIM_ManagementController
 */
 
     [Description("The VLAN setting on the BMC NIC port.")]
-    string VLAN;        
-                
+    string VLAN;
+
     [Description ("This variable will capture MAC address of the BMC.") ]
     string PermanentMACAddress;
 
 
-   [Description("If BMC provides any user friendly interfaces like http, ftp etc, this variable will capture the related URL/s to interact with BMC.")]   
+   [Description("If BMC provides any user friendly interfaces like http, ftp etc, this variable will capture the related URL/s to interact with BMC.")]
     string BMC_URLs[];
 
     [Description("This variable will capture the version of the firmware installed on the BMC")]
     string FirmwareVersion;
-   
+
    [Description("This Array will capture the list of protocols supported by the BMC"),
     ArrayType ("Indexed"),
     MaxLen (256)]
 //    ModelCorrespondence {"LMI_BMC.SupportedProtoVersion"}  ]
     string SupportedProtos[];
-    
+
     [Description("This Array will capture the version of the supported protocol listed in the corresponding index of SupportedProtos "),
     ArrayType ("Indexed")]
 //    ModelCorrespondence {"LMI_BMC.SupportedProtos" } ]
     string SupportedProtoVersions[];
-   
+
 
     [Description("Function to add a new IPv4 address/es to BMC. The passed ipaddresses and netmasks will be assigned to the BMC. A Netmask for every IP address should be present in the input."),
     ValueMap {"0","1","2"},
     Values {"Success", "Failed", "Invalid Argument"}]
     uint32   set_IP4Address(
-                [IN, Description ("Set the IP addresses of the BMC, to the input values")] 
-                string IP4Addresses[], 
+                [IN, Description ("Set the IP addresses of the BMC, to the input values")]
+                string IP4Addresses[],
                 [IN, Description ("Set the netmasks to this input values")]
-                string Netmasks[], 
+                string Netmasks[],
                 [IN, Description ("Set the gateway this input value")]
                 string Gateway );
 
@@ -81,10 +81,10 @@ class LMI_BMC : CIM_ManagementController
      ValueMap {"0","1","2"},
      Values {"Success", "Failed", "Invalid Argument"}]
     uint32  set_IP6Address(
-                [IN, Description ("Set the IPv6 addresses of the BMC, to the input values")] 
-                string IP6Addresses[], 
+                [IN, Description ("Set the IPv6 addresses of the BMC, to the input values")]
+                string IP6Addresses[],
                 [IN, Description ("Set the netmasks to this input values")]
-                string Netmasks[], 
+                string Netmasks[],
                 [IN, Description ("Set the gateway on BMC to this input value")]
                 string Gateway);
 
@@ -96,11 +96,11 @@ class LMI_BMC : CIM_ManagementController
     uint32 set_VLAN(
                 [IN, Description("Set the VLAN ID of BMC NIC to this input value")]
                 string Vlan
-                );             
+                );
 
-    
+
     [Description("Some servers have dedicated NIC attached to BMC, some share a LOM used for host n/w communications. This function will let the user know which the case is."),
-    ValueMap {"0", "1","2","3","4"}, 
+    ValueMap {"0", "1","2","3","4"},
     Values {"Dedicated", "LOM1","LOM2","LOM3","LOM4"}]
     string get_active_nic();
 };

@@ -88,7 +88,7 @@ bool is_vendor_like_dell(char *vendor);
 
 /*
  * From a known list, check if the vendor supports IPMI. If IPMI is suppor-
- * ted and doesn't work properly, return an ERROR. 
+ * ted and doesn't work properly, return an ERROR.
  * If IPMI is not supported, fall back to other interfaces.
  * */
 bool does_vendor_support_ipmi(char *vendor);
