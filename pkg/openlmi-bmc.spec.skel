@@ -11,6 +11,7 @@ BuildRequires: cmake
 BuildRequires: konkretcmpi konkretcmpi-devel
 BuildRequires: sblim-cmpi-devel
 BuildRequires: openlmi-providers-devel >= 0.4.1
+BuildRequires:  glib2-devel
 
 Requires: konkretcmpi
 Requires: cim-server
