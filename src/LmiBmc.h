@@ -14,13 +14,15 @@
 
 #include <openlmi/openlmi.h>
 
-
 #define DELL_LIKE_VENDORS "Dell Inc, Dell, Dell Computer Corporation"
 #define IPMI_SUPPORTING_VENDORS "Dell Inc, Dell, Dell Computer Corporation"
 #define BUFLEN 1024
 #define WHITESPACES " \f\n\r\t\v"
 #define IPv4_Add_Size 11
 
+#undef lmi_warn
+#undef lmi_debug
+#undef lmi_error
 #define  lmi_warn(...)  printf("\nWARNING:");  printf(__VA_ARGS__)
 #define  lmi_debug(...)  printf("\nDEBUG:");  printf(__VA_ARGS__)
 #define  lmi_error(...)  printf("\nERROR:");  printf(__VA_ARGS__)

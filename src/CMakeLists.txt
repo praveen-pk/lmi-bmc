@@ -3,8 +3,7 @@ set(LIBRARY_NAME cmpiLMIBmc)
 set(MOF LMI_BMC.mof)
 set (CIM_CLASSES LMI_BMC)
 
-set(CMAKE_C_FLAGS " -W -Wformat-security -pedantic -g3 -Wextra -Wno-unused-parameter -Wformat -Wparentheses -Wl,--no-undefined ")
-
+set(CMAKE_C_FLAGS " -W -Wformat-security -pedantic -g3 -Wextra -Wno-unused-parameter -Wformat -Wparentheses -Wl,--no-undefined ${CMAKE_C_FLAGS} ")
 
 set(LmiBmc_SRCS
     LmiBmc.c
@@ -22,7 +21,7 @@ add_library(${LIBRARY_NAME} SHARED
             ${CIM_HEADERS}
 )
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMPI_INCLUDE_DIR}
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMPI_INCLUDE_DIR} ${GLIB_INCLUDE_DIRS}
     ${KONKRETCMPI_INCLUDE_DIR}
 )
 

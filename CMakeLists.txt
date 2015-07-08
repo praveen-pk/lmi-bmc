@@ -13,7 +13,11 @@ endif(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 set (CMAKE_INSTALL_PREFIX /usr)
 
+add_definitions(-D_XOPEN_SOURCE=500 -D_GNU_SOURCE)
 set(CMAKE_C_FLAGS " -pedantic -g -Wextra -Wno-unused-parameter -Wformat -Wparentheses -Wl,--no-undefined ${CMAKE_C_FLAGS}")
+
+find_package(PkgConfig)
+pkg_check_modules (GLIB   glib-2.0)
 
 include(OpenLMIMacros RESULT_VARIABLE LMIMACROS)
 
@@ -27,5 +31,3 @@ find_package(KonkretCMPI REQUIRED)
 add_subdirectory(src)
 add_subdirectory(mof)
 add_subdirectory(pkg)
-
-
