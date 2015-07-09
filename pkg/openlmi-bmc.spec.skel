@@ -69,6 +69,7 @@ fi >> %logfile 2>&1
 
 
 %files
+%{_datadir}/doc/%{name}/*
 %{_libdir}/cmpi/*
 %{_datarootdir}/openlmi-providers/*
 

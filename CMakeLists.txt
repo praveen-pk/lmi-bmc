@@ -12,6 +12,7 @@ else(CMAKE_SIZEOF_VOID_P EQUAL 4)
 endif(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 set (CMAKE_INSTALL_PREFIX /usr)
+set (DOCDIR "share/doc/opelmi-bmc/" )
 
 add_definitions(-D_XOPEN_SOURCE=500 -D_GNU_SOURCE)
 set(CMAKE_C_FLAGS " -pedantic -g -Wextra -Wno-unused-parameter -Wformat -Wparentheses -Wl,--no-undefined ${CMAKE_C_FLAGS}")
@@ -25,6 +26,7 @@ if (${LMIMACROS} STREQUAL "NOTFOUND")
     message(FATAL_ERROR "OpenLMIMacros.cmake not found, check if openlmi-providers(-devel) is installed")
 endif (${LMIMACROS} STREQUAL "NOTFOUND")
 
+install( FILES COPYING DESTINATION ${DOCDIR} )
 find_package(CMPI REQUIRED)
 find_package(KonkretCMPI REQUIRED)
 
