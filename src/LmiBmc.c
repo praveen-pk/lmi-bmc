@@ -456,7 +456,7 @@ int populate_bmc_info_with_ipmi(BMC_info *bmc_info)
     }
     bmc_info->supportedProtoVersions[0] =tmp_str;
 
-    tmp_str = calloc(4, sizeof(char));
+    tmp_str = calloc(5, sizeof(char));
     if (tmp_str == NULL)
     {
 	lmi_error ("Failed while allocating memory");
