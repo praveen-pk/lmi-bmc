@@ -1,3 +1,5 @@
+use_c99()
+
 set(PROVIDER_NAME LMI_BMC)
 set(LIBRARY_NAME cmpiLMIBmc)
 set(MOF LMI_BMC.mof)
