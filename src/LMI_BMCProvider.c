@@ -43,12 +43,18 @@ static CMPIStatus LMI_BMCEnumInstances(
     const char** properties)
 {
     const char *ns = KNameSpace(cop);
-    CMPIString *x = lmi_get_system_creation_class_name();
+    const char *x = lmi_get_system_creation_class_name();
     BMC_info *bmc_info = NULL;
     int i=0;
     char *vendor = NULL;
     char *errstr = NULL;
-    CMPIrc rc;
+
+	if (x == NULL)
+	{
+	lmi_error("Not able to get system creation class name");
+	asprintf (&errstr,"Not able to get system creation class name\n" );
+	goto failed;
+	}
 
     vendor = get_bios_vendor();
     if (vendor == NULL)
@@ -70,25 +76,21 @@ static CMPIStatus LMI_BMCEnumInstances(
 	if (populate_bmc_info_with_ipmi(bmc_info)){
 	    /*bmc_info is already de-allocated, set it to NULL*/
 	    bmc_info=NULL;
-	    rc=CMPI_RC_ERR_FAILED;
 	    asprintf(&errstr,"Failed running the ipmitool command. Check if ipmi service is running");
 	    goto failed;
-
 	}
     }
     else
     {
 	/*Fallback to interfaces other than IPMI here*/
-	rc=CMPI_RC_ERR_FAILED;
 	asprintf(&errstr,"BIOS vendor: %s is NOT SUPPORTED", vendor);
 	goto failed;
     }
 
-
     LMI_BMC inst;
     LMI_BMC_Init(&inst,_cb,ns );
     /*TODO: CIM_LogicalDevice features */
-    LMI_BMC_Set_SystemCreationClassName (&inst,lmi_get_system_creation_class_name());
+    LMI_BMC_Set_SystemCreationClassName(&inst,x);
     LMI_BMC_Init_IP4Addresses(&inst,bmc_max_ips);
     for (i=0;i<bmc_max_ips;i++)
     {
@@ -103,7 +105,6 @@ static CMPIStatus LMI_BMCEnumInstances(
     }
 
     LMI_BMC_Set_IP4AddressSource(&inst,strdup(bmc_info->IP4AddressSource));
-
 
     LMI_BMC_Init_BMC_URLs(&inst,1);
     LMI_BMC_Set_BMC_URLs(&inst,0,strdup(bmc_info->BMC_URLs[0]));
@@ -131,7 +132,6 @@ failed:
     free_bmc_info(bmc_info);
 //TODO: Return an empty instance.
     if (errstr){
-
 	CMReturnWithChars(_cb, CMPI_RC_ERR_FAILED, errstr);
     }
     else
