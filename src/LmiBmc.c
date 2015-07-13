@@ -351,10 +351,9 @@ char * get_value_from_buffer(char *input, char **buffer, int buffer_size)
 
 int populate_bmc_info_with_ipmi(BMC_info *bmc_info)
 {
-    int buffer_size=0, tmp_len=0;
+    int buffer_size=0;
     char **buffer=NULL;
     char *tmp_str;
-    int ret=0;
 
     if (! command_exists ("ipmitool ")){
 	lmi_error ("ipmitool comman doesn't exist. send empty instance");
@@ -481,13 +480,11 @@ int populate_bmc_info_with_ipmi(BMC_info *bmc_info)
     }
     bmc_info->FirmwareVersion = tmp_str;
 
-
     return 0;
 
 failed:
     free_bmc_info(bmc_info);
     return 1;
-
 }
 
 
@@ -535,10 +532,9 @@ void free_bmc_info( BMC_info *bmc_info)
 
 void free_list(char **list, int count)
 {
-    int i;
     if (list != NULL)
     {
-	int i=0;
+	int i;
 	for (i=0;i<count; i++)
 	{
 	    free(list[i]);
