@@ -48,7 +48,6 @@ static CMPIStatus LMI_BMCEnumInstances(
     int i=0;
     char *vendor = NULL;
     char *errstr = NULL;
-    CMPIrc rc;
 
     vendor = get_bios_vendor();
     if (vendor == NULL)
@@ -70,20 +69,16 @@ static CMPIStatus LMI_BMCEnumInstances(
 	if (populate_bmc_info_with_ipmi(bmc_info)){
 	    /*bmc_info is already de-allocated, set it to NULL*/
 	    bmc_info=NULL;
-	    rc=CMPI_RC_ERR_FAILED;
 	    asprintf(&errstr,"Failed running the ipmitool command. Check if ipmi service is running");
 	    goto failed;
-
 	}
     }
     else
     {
 	/*Fallback to interfaces other than IPMI here*/
-	rc=CMPI_RC_ERR_FAILED;
 	asprintf(&errstr,"BIOS vendor: %s is NOT SUPPORTED", vendor);
 	goto failed;
     }
-
 
     LMI_BMC inst;
     LMI_BMC_Init(&inst,_cb,ns );
@@ -131,7 +126,6 @@ failed:
     free_bmc_info(bmc_info);
 //TODO: Return an empty instance.
     if (errstr){
-
 	CMReturnWithChars(_cb, CMPI_RC_ERR_FAILED, errstr);
     }
     else
