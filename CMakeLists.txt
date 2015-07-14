@@ -12,7 +12,7 @@ else(CMAKE_SIZEOF_VOID_P EQUAL 4)
 endif(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 set (CMAKE_INSTALL_PREFIX /usr)
-set (DOCDIR "share/doc/opelmi-bmc/" )
+set (DOCDIR "share/doc/openlmi-bmc/" )
 
 add_definitions(-D_GNU_SOURCE)
 set(CMAKE_C_FLAGS "-std=c99 -pedantic -g3 -Wextra -Wformat -Wparentheses -Wl,--no-undefined ${CMAKE_C_FLAGS}")
