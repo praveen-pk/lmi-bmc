@@ -227,7 +227,7 @@ done:
     }
 
     if (ret < 0) {
-        free_2d_buffer(&buffer, &buffer_size);
+        free_2d_buffer(buffer, buffer_size);
     }
 
     return ret;
@@ -351,7 +351,8 @@ char * get_value_from_buffer(char *input, char **buffer, int buffer_size)
 
 int populate_bmc_info_with_ipmi(BMC_info *bmc_info)
 {
-    int buffer_size=0, tmp_len=0;
+    unsigned int buffer_size=0;
+    int tmp_len=0;
     char **buffer=NULL;
     char *tmp_str;
     int ret=0;
