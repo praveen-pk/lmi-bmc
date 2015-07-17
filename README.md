@@ -27,6 +27,7 @@ make install
 cd lmi-bmc
 ./make-release.sh <commit-id>
 ```
+TODO: Needs to be corrected
 Pass the latest commit ID to the script. The script will pick up the latest tagged commit in the history starting from the commit ID provided and create a dist archive.
 Use the thus created dist archive with the spec file in pkg directory and create an rpm package.
 
