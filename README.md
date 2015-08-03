@@ -27,7 +27,17 @@ make install
 cd lmi-bmc
 ./make-release.sh <commit-id>
 ```
-TODO: Needs to be corrected
-Pass the latest commit ID to the script. The script will pick up the latest tagged commit in the history starting from the commit ID provided and create a dist archive.
-Use the thus created dist archive with the spec file in pkg directory and create an rpm package.
+If the passed commit-id points to a tag, then an archive with the name '''openlmi-bmc-<tag>.tar.gz''' wil be created. This archive can be used with the spec file created in pkg directory to build an rpm package. 
 
+
+## How to run lmi-bmc 
+The post scripts populated in the openlmi-bmc package automatically register the LMI_BMC provider to the CIMOM running. Both sfcb and tog-pegasus CIMOMs are supported. 
+
+With SFCB CIMOM installed on the target system, the following output while enumerating the registered class names confirms the provider is properly registered
+ wbemcli ecn https://root:password@localhost:5989/root/cimv2 | grep LMI
+ localhost:5989/root/cimv2:LMI_BMC
+ 
+wbemcli is a standalone WBEM client program. To enumerate the Service Processors installed in the system:
+ wbemcli ei https://root:password@localhost:5989/root/cimv2:LMI_BMC
+ 
+ 
