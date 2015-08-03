@@ -33,7 +33,7 @@ If the passed commit-id points to a tag, then an archive with the name **openlmi
 ## How to run lmi-bmc 
 The post scripts populated in the openlmi-bmc package automatically register the LMI_BMC provider to the CIMOM running. Both sfcb and tog-pegasus CIMOMs are supported. 
 
-With SFCB CIMOM installed on the target system, the following output while enumerating the registered class names confirms the provider is properly registered
+With SFCB CIMOM installed on the target system, the following output while enumerating the registered class names confirms the LMI_BMC provider is properly registered
 ```
  wbemcli ecn https://root:password@localhost:5989/root/cimv2 | grep LMI
  localhost:5989/root/cimv2:LMI_BMC
