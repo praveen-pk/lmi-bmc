@@ -33,6 +33,7 @@ cim_registration(${PROVIDER_NAME} ${LIBRARY_NAME} ${MOF} "")
 # A temporary fix for the registration file.
 add_custom_command ( TARGET ${LIBRARY_NAME}
 		     POST_BUILD
+		     COMMENT "Fixing the generated .reg file"
 		     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/fix_reg.sh ${REG}
 		     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
