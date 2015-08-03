@@ -30,6 +30,13 @@ target_link_libraries(${LIBRARY_NAME}  openlmicommon ${KONKRETCMPI_LIBRARIES})
 # Create registration file
 cim_registration(${PROVIDER_NAME} ${LIBRARY_NAME} ${MOF} "")
 
+# A temporary fix for the registration file.
+add_custom_command ( TARGET ${LIBRARY_NAME}
+		     POST_BUILD
+		     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/fix_reg.sh ${REG}
+		     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 install(TARGETS ${LIBRARY_NAME} DESTINATION /usr/lib${LIB_SUFFIX}/cmpi/)
 
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/LMI_BMC.reg DESTINATION share/openlmi-providers/)
